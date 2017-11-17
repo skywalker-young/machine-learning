@@ -1,0 +1,44 @@
+ 
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from statsmodels.formula.api import ols
+ 
+from statsmodels.stats.anova import anova_lm
+import seaborn
+
+dataset2=pd.read_csv( 'C:\\Users\\User\\Desktop\\832video\\Assign1.csv' )
+dataset1=pd.read_csv( 'C:\\Users\\User\\Desktop\\832video\\Assign11.csv' )
+df= dataset2.iloc[:,0]         '''   .iloc to extract value from pandas dataset'''
+target = dataset2.iloc[:,1]
+
+
+
+  
+  
+'''  import statsmodels.api as sm
+  
+  model=sm.OLS(df,target).fit()    
+  model.summary()                          this part of code also shows in websites, 
+                                           but when i run these codes, the table is different from table produced by SAS        ''' 
+  #generate parameter estimation table
+  
+  data = pandas.DataFrame({'x': target, 'y': df})
+model = ols("y~x", data).fit()
+
+'''data = pd.DataFrame({'x': target, 'y': df}, index=[0])'''
+ 
+'''  model = ols("y~x", data).fit()           this two methods is very similar but results is quite different      
+anova_results = anova_lm(model)
+
+ 
+print(anova_results)) '''
+   
+  model=ols('Y~X',data=dataset1).fit()    
+ 
+   anoval_result=anova_lm(model,type=2)
+   print(anoval_result)
+   
+ plt.plot(target,df , 'o')  
+ 
+ seaborn.lmplot(x="X",y="Y",data=dataset1)
