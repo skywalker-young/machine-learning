@@ -1,0 +1,67 @@
+def __init__(self, sizes):
+        """
+        :param sizes: list类型，储存每层神经网络的神经元数目
+                      譬如说：sizes = [2, 3, 2] 表示输入层有两个神经元、
+                      隐藏层有3个神经元以及输出层有2个神经元
+        """
+        # 有几层神经网络 
+        self.num_layers = len(sizes)
+        self.sizes = sizes
+        # 除去输入层，随机产生每层中 y 个神经元的 biase 值（0 - 1）
+        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+        # 随机产生每条连接线的 weight 值（0 - 1）
+        self.weights = [np.random.randn(y, x)
+                        for x, y in zip(sizes[:-1], sizes[1:])]
+return;
+ 
+def feedforward(self, a):
+        """
+        前向传输计算每个神经元的值
+        :param a: 输入值
+        :return: 计算后每个神经元的值
+        """
+        for b, w in zip(self.biases, self.weights):
+            # 加权求和以及加上 biase
+            a = sigmoid(np.dot(w, a)+b)
+        return a;
+
+def SGD(self, training_data, epochs, mini_batch_size, eta,
+            test_data=None):
+        """
+        随机梯度下降
+        :param training_data: 输入的训练集
+        :param epochs: 迭代次数
+        :param mini_batch_size: 小样本数量
+        :param eta: 学习率 
+        :param test_data: 测试数据集
+        """
+        if test_data: n_test = len(test_data)
+        n = len(training_data)
+        for j in xrange(epochs):
+            # 搅乱训练集，让其排序顺序发生变化
+            random.shuffle(training_data)
+            # 按照小样本数量划分训练集
+            mini_batches = [
+                training_data[k:k+mini_batch_size]
+                for k in xrange(0, n, mini_batch_size)]
+            for mini_batch in mini_batches:
+                # 根据每个小样本来更新 w 和 b，代码在下一段
+                self.update_mini_batch(mini_batch, eta)
+            # 输出测试每轮结束后，神经网络的准确度
+            if test_data:
+                print (j, self.evaluate(test_data), n_test)
+            else:
+                print (j)
+return; 
+def evaluate(self, test_data):
+        # 获得预测结果
+        test_results = [(np.argmax(self.feedforward(x)), y)
+                        for (x, y) in test_data]
+        # 返回正确识别的个数
+return sum(int(x == y) for (x, y) in test_results)
+
+import network
+
+training_data, validation_data, test_data = mnist_loader.load_data_wrapper()
+net = network.Network([784, 30, 10])
+net.SGD(training_data, 30, 10, 3.0, test_data = test_data)
