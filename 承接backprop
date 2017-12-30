@@ -1,0 +1,36 @@
+function [z] = sigmoid(z)
+%The sigmoid function
+z = exp(-z);
+z = 1+z;
+z = 1./z;
+end
+
+
+
+function [z] = sigmoid_prime(z)
+%Derivative of the sigmoid function.
+z = 1-sigmoid(z);
+z = z.*sigmoid(z);
+end
+
+
+function [ret] = cost_derivative(output_activations, y)
+
+%"""Return the vector of partial derivatives \partial C_x /
+%        \partial a for the output activations."""
+       ret = (output_activations.-y);
+end
+
+
+function [a] = feedforward(a)
+%   If a is the input to the network, what would be the output ?
+%         global psizes;
+%         global biases;
+%         global weights;
+        y=psizes(2:end);
+        for i =1:numel(y)
+        z = weights(i).weight*a + biases(i).bias;
+        a = sigmoid(z);
+        end
+
+end
