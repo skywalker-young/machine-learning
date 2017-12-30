@@ -1,1 +1,2 @@
-# python_machine-learning
+# machine-learning
+#major studying from Internet
