@@ -60,4 +60,4 @@ P_back = 0
 for i in range(N):
     P_back += pi[i] * B[i, O[0]] * Beta[0, i]
 
-print (P_back)
+print (P_back) 
