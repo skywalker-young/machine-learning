@@ -1,0 +1,111 @@
+import numpy as np
+import scipy as sp
+import matplotlib.pyplot as plt
+from random import Random
+
+# Mapping of start : end spaces of chutes & ladders     #dictionary
+CHUTES_LADDERS = {1:38, 4:14, 9:31, 16:6, 21:42, 28:84, 36:44,
+                  47:26, 49:11, 51:67, 56:53, 62:19, 64:60,
+                  71:91, 80:100, 87:24, 93:73, 95:75, 98:78}
+
+#print(CHUTES_LADDERS[16])
+def simulate_cl_game(rseed=None, max_roll=6):
+    """
+    Simulate a full Chutes & Ladders game
+    and return the number of turns to finish
+    """
+    rand = Random(rseed)
+    position = 0
+    turns = 0
+    while position < 100:
+        turns += 1
+        roll = rand.randint(1, max_roll)
+
+        # if the roll takes us past square 100, we don't move
+        if position + roll > 100:
+            continue
+
+        # otherwise, move the position according to the roll
+        position += roll
+
+        # go up/down any chute/ladder
+        position = CHUTES_LADDERS.get(position, position)
+    return turns
+
+sim_games = [simulate_cl_game() for i in range(5000)]
+'''
+
+#print(sim_games)
+plt.hist(sim_games, bins=range(200), normed=True)
+plt.xlabel('Number of Turns to win')
+plt.ylabel('Fraction of games')
+plt.title('Simulated Lengths of Chutes & Ladders Games')
+plt.show()
+'''
+
+def cl_markov_matrix(max_roll=6, jump_at_end=True):
+    """
+    Create a Markov transition matrix
+
+    If jump_at_end is True, then apply ladder/chute jumps at the end of each turn.
+    If False, then apply them at the beginning of the next turn.
+    """
+    # Create the basic transition matrix:
+    mat = np.zeros((101, 101))
+    for i in range(101):
+        mat[i + 1:i + 1 + max_roll, i] = 1. / max_roll
+
+    # We could alternatively use scipy.linalg.circulent as follows:
+    # mat = circulant([0, *np.ones(max_rolls) / 6, *np.zeros(100)])[:101, :101]
+
+    # rolls off the end of the board don't change the state;
+    # add these probabilities to the diagonal
+    mat[range(101), range(101)] += 1 - mat.sum(0)
+
+    # account for the presence of chutes and ladders
+    # we'll do this via  another transition matrix
+    cl_mat = np.zeros((101, 101))
+    ind = [CHUTES_LADDERS.get(i, i) for i in range(101)]
+    cl_mat[ind, range(101)] = 1
+    if jump_at_end:
+        return cl_mat @ mat
+    else:
+        return mat @ cl_mat
+
+
+mat = cl_markov_matrix()
+plt.matshow(mat)
+plt.grid(False)
+plt.show()
+
+def cl_probability(n):
+    """Compute the state vector after n turns"""
+    mat = cl_markov_matrix()
+    v_0 = [1, *np.zeros(100)]
+    return np.linalg.matrix_power(mat, n) @ v_0
+
+probs = [cl_probability(i)[-1] for i in range(200)]
+
+plt.hist(sim_games, bins=range(200), normed=True,
+         align='mid', alpha=0.5);
+plt.plot(np.arange(1, 200), np.diff(probs), color='black')
+plt.title('Chutes and Ladders Completion Rate')
+plt.xlabel('number of turns')
+plt.ylabel('fraction of games completed');
+
+
+def cl_probability(n):
+    """Compute the state vector after n turns"""
+    mat = cl_markov_matrix()
+    v_0 = [1, *np.zeros(100)]
+    return np.linalg.matrix_power(mat, n) @ v_0
+
+probs = [cl_probability(i)[-1] for i in range(200)]
+
+plt.hist(sim_games, bins=range(200), normed=True,
+         align='mid', alpha=0.5);
+plt.plot(np.arange(1, 200), np.diff(probs), color='black')
+plt.title('Chutes and Ladders Completion Rate')
+plt.xlabel('number of turns')
+plt.ylabel('fraction of games completed')
+plt.show()
