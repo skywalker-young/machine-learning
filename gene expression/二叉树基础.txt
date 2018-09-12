@@ -1,34 +1,64 @@
-class Node(object):
-    def __init__(self,value=None):
-        self.value=value
+class Node:
+    def __init__(self,value):
         self.left=None
         self.right=None
+        self.value=value
 
 
-class Tree(object):
+class Tree:
     def __init__(self):
-        self.root=Node('root')
         self.size=1
-        self.decision=['left','right']
-        self.fitness=None
+        self.root=Node('root')
 
-    def inorder(self,root):  # 中序序遍历
-        if root is None:
-            return []
+    def is_operator(self,root):
+        if (root.value=='+'or root.value=='-'or root.value=='*'or root.value=='/' ):
+            return 2
+        else:
+            return 1
+    def infix(self,root):
+        equation=[]
+        if root.value is not None:
+            self.infix(root.left)
+            equation.extend(root.value)
+            self.infix(root.right)
 
-        result = [root.value]
-        left_item =  self.inorder(root.left)
-        right_item =  self.inorder(root.right)
-        return left_item + result + right_item
+
+    def evaluateExpressionTree(self,root):
+        if root is None: #empty tree
+            return 0
+        #leaf node
+        if root.left is None and root.right is None:
+            return int(root.value)
+
+        left_sum=self.evaluateExpressionTree(root.left)
+        right_sum=self.evaluateExpressionTree(root.right)
+
+        if root.value=='+':
+            return left_sum + right_sum
+        elif root.value=='-':
+            return left_sum-right_sum
+        elif root.value=='*':
+            return left_sum*right_sum
+        elif root.value=='/':
+            return left_sum/right_sum
+
+
+
+
+
+
 
 tree=Tree()
-tree.root=Node('-')
-tree.root.left=Node('+')
+tree.root.value='+'
+tree.root.left=Node('*')
+tree.root.right=Node('-')
 tree.root.left.left=Node('4')
-tree.root.left.right=Node('3')
-tree.root.right=Node('*')
-tree.root.right.left=Node('2')
-tree.root.right.right=Node('2')
-a=(tree.inorder(tree.root))
-#tt=eval(a)
-print(a)
+tree.root.left.right=Node('6')
+tree.root.right.left=Node('6')
+tree.root.right.right=Node('3')
+print(tree.root.value)
+print(tree.root.left.value)
+print(tree.root.right.value)
+
+a=tree.evaluateExpressionTree(tree.root)
+print('a',a)
