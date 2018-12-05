@@ -1,0 +1,47 @@
+def generate_test_image(m,n):
+    X=np.zeros((m,n))
+    #generate a rectangle
+    X[25:80,25:80]=1
+    #generate a triangle
+    for i in range(25,80,1):
+        X[i+80:160,100+i-1]=2
+    #generate a circle
+    for i in range(0,200,1):
+        for j in range (0,200,1):
+            if ((i-135)*(i-135)+(j-53)*(j-53)<=900):
+                X[i,j]=3
+    return X
+X=generate_test_image(200,200)
+
+
+m=X.shape[0] #number of rows
+n=X.shape[1] #number of columns
+
+X=np.asarray(X,dtype=np.float64)
+C=np.cov(X)
+#np.linalg.matrix_rank(C) #62
+
+P,L=LA.eigh(C) #list the eigenvalues from small to large in P
+P=P[::-1]
+L=L[:,::-1]
+#print(P)
+#print(L)
+
+np.allclose(L.dot(np.diag(P)).dot(L.T),C)#True
+
+#plot all of the eigenvalues
+plt.semilogy(P,'-o')
+plt.xlim([1,P.shape[0]])
+plt.xlabel('eigenvalue index')
+plt.ylabel('value in a log scale')
+plt.title('eigenvalue of covarianceo  matrix')
+plt.show()
+plt.plot((P/P.sum()).cumsum(),'-o')
+plt.show()
+
+# V=L.T.dot(X)
+# #V.shape #(200,200)
+# X_tilde_10=L[:,0:30-1].dot(V[0:30-1,:])
+# plt.figure(figsize=((10,10)))
+# plt.imshow(X_tilde_10,cmap='gray')
+# plt.show()
