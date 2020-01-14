@@ -1,0 +1,103 @@
+###
+#先尝试拟合sin曲线
+###
+import pandas as pd
+# import matplotlib.pyplot as plt
+# import scipy as sp
+# import numpy as np
+# from keras.layers import Dense, Activation, Dropout, LSTM
+# from keras.models import Sequential, load_model
+# from keras.callbacks import EarlyStopping, ModelCheckpoint
+# import math
+# x=np.linspace(-10,10,1000)
+# y=5*sp.sin(x)+sp.cos(x)
+#
+# x_train,x_test=x[:len(x)//3*2],x[len(x)//3*2:]
+# y_train,y_test=y[:len(x)//3*2],y[len(x)//3*2:]
+# xx=np.reshape(x_train,(len(x_train),1))
+# x_train1=np.reshape(x_train,(len(x_train),1,1))
+# # print(x_train)
+# # help(Sequential)
+# inputfeature_num=1###x是一维的
+# units_num=inputfeature_num*2###or 随便决定？？
+# regressor=Sequential()
+# regressor.add(LSTM(units=10,return_sequences=True,input_shape=(len(x_train),1)))
+# regressor.add(Dropout(0.1))
+# regressor.add(LSTM(units=10,return_sequences=True))
+# regressor.add(Dropout(0.1))
+# regressor.add(Dense(units=1))
+# regressor.compile(optimizer='adam',loss='mean_squared_error')
+# regressor.fit(x_train1,y_train,epochs=20,batch_size=100)
+#
+# y_pred=regressor.predict(x_test)
+# plt.plot(y_test)
+# plt.plot(y_pred)
+# plt.show()
+
+#以下是可以跑通的部分
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import LSTM, Dense, Activation
+from keras.utils.vis_utils import plot_model
+import matplotlib.pyplot as plt
+import numpy as np
+
+seq = 10
+x = np.arange(0, 6 * np.pi, 0.01)
+y = np.sin(x) + np.cos(x) * x
+
+fig = plt.figure(1)
+plt.plot(y, 'r')
+
+train = np.array(y).astype(float)
+scaler = MinMaxScaler()
+train=train.reshape(-1,1)
+train = scaler.fit_transform(train)
+data = []
+for i in range(len(train) - seq - 1):
+    data.append(train[i: i + seq + 1])###每十个添加一次
+data = np.array(data).astype('float64')
+
+x = data[:, :-1]
+
+y = data[:, -1]
+split = int(data.shape[0] * 0.5)
+
+train_x = x[: split]
+train_y = y[: split]
+
+test_x = x  # [split:]
+test_y = y  # [split:]
+
+train_x = np.reshape(train_x, (train_x.shape[0], train_x.shape[1], 1))
+# print(train_x[0])
+# print(train_x[1])
+# exit()
+test_x = np.reshape(test_x, (test_x.shape[0], test_x.shape[1], 1))
+###转成三维
+model = Sequential()
+# model.add(LSTM(units=100,input_dim=1, output_dim=6, return_sequences=True))
+model.add(LSTM(units=6,input_shape=(10,1) ,return_sequences=True))
+#output 6 outcomes
+model.add(LSTM(units=12, return_sequences=False))
+#output 12 outcomes
+model.add(Dense(units=1))
+##final output 1 putcome
+model.add(Activation('sigmoid'))
+##通过修改激活函数，会得到比较大的出路结果
+##如何计算整个模型具体的neurons个数，尚需学习
+model.summary()
+
+model.compile(loss='mse', optimizer='rmsprop')
+
+model.fit(train_x, train_y, batch_size=50, epochs=100, validation_split=0.1)
+predict_y = model.predict(test_x)
+predict_y = np.reshape(predict_y, (predict_y.size,))
+
+predict_y = scaler.inverse_transform([[i] for i in predict_y])
+test_y = scaler.inverse_transform(test_y)
+fig2 = plt.figure(2)
+plt.plot(predict_y, 'g')
+plt.plot(test_y, 'r')
+plt.show()
+
